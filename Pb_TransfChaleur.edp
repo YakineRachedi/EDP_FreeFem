@@ -1,0 +1,149 @@
+// Génération du maillage :
+
+// Donneés :
+
+real alpha = 1;
+real beta = 0.7;
+real l = 0.1;
+
+func f = (1 / beta) * ((x - alpha) + beta * l * sin(2 * pi * (x - alpha) / beta));
+
+// Création du bord
+border c1 (t = 0, alpha) {x = t; y = 0; label = 1;};
+border c2 (t = alpha, alpha + beta) {x = t; y = f; label = 2;};
+border c3 (t = alpha + beta, 0) {x = t; y = 1; label = 3;};
+border cf (t = 1, 0) {x = 0; y = t; label = 4;};
+
+real h1 = 0.01;
+real N1 = alpha / h1;
+
+// Création du maillage
+mesh Th1 = buildmesh(c1(N1) + c2(N1) + c3(N1) + cf(N1));
+
+// Affichage
+plot(Th1, wait = 1, cmm="mesh 1, h = 0.01");
+
+real h2 = 0.025;
+real N2 = alpha / h2;
+mesh Th2 = buildmesh(c1(N2) + c2(N2) + c3(N2) + cf(N2));
+plot(Th2, wait = 1, cmm="mesh 2, h = 0.025");
+
+real h3 = 0.05;
+real N3 = alpha / h3;
+mesh Th3 = buildmesh(c1(N3) + c2(N3) + c3(N3) + cf(N3));
+plot(Th3, wait = 1, cmm="mesh 3, h = 0.05");
+
+real h4 = 0.1;
+real N4 = alpha / h4;
+mesh Th4 = buildmesh(c1(N4) + c2(N4) + c3(N4) + cf(N4));
+plot(Th4, wait = 1, cmm="mesh 4, h = 0.1");
+
+//savemesh(Th1, "mesh1.msh");
+//savemesh(Th2, "mesh2.msh");
+//savemesh(Th3, "mesh3.msh");
+//savemesh(Th4, "mesh4.msh");
+
+
+fespace Vh1(Th1,P1); /* Espace d'approximation P1*/
+fespace Vh2(Th2,P1); /* Espace d'approximation P1*/
+fespace Vh3(Th3,P1); /* Espace d'approximation P1*/
+fespace Vh4(Th4,P1); /* Espace d'approximation P1*/
+
+// Taille des éléments d'un triangle
+Vh1 hh1 = hTriangle;
+cout << "hmax = " << hh1[].max << "-- hmin = " << hh1[].min << endl;
+
+Vh2 hh2 = hTriangle;
+cout << "hmax = " << hh2[].max << "-- hmin = " << hh2[].min << endl;
+
+Vh3 hh3 = hTriangle;
+cout << "hmax = " << hh3[].max << "-- hmin = " << hh3[].min << endl;
+
+Vh4 hh4 = hTriangle;
+cout << "hmax = " << hh4[].max << "-- hmin = " << hh4[].min << endl;
+
+
+// Adaptation du Mesh : 
+
+Th1 = adaptmesh(Th1, iso = 1, hmax = h1, nbvx = 50000);
+plot(Th1, wait = 1, cmm="mesh 1 apres adaptation");
+
+Th2 = adaptmesh(Th2, iso = 1, hmax = h2, nbvx = 50000);
+plot(Th2, wait = 1, cmm="mesh 2 apres adaptation");
+
+Th3 = adaptmesh(Th3, iso = 1, hmax = h3, nbvx = 50000);
+plot(Th3, wait = 1, cmm="mesh 3 apres adaptation");
+
+Th4 = adaptmesh(Th4, iso = 1, hmax = h4, nbvx = 50000);
+plot(Th4, wait = 1, cmm="mesh 4 apres adaptation");
+
+// Probleme EF :
+real k = 0.01;
+// cas 1
+Vh4 phi1, vh1;
+problem Pb1 (phi1,vh1) = int2d(Th4) (k * ( dx(phi1) * dx(vh1) + dy(phi1) * dy(vh1) ) ) + on(4, phi1 = 0) + on(2, phi1 = 1);
+
+Pb1;
+plot(phi1, fill = 1, value = 1, wait = 1, cmm="Solution avec u = 0");
+
+// cas 2 : u = (0.1; 0)
+
+Vh4 phi2, vh2;
+problem Pb2 (phi2,vh2) = int2d(Th4) (k * ( dx(phi2) * dx(vh2) + dy(phi2) * dy(vh2) ) + 0.1 * dx(phi2) * vh2) + on(4, phi2 = 0) + on(2, phi2 = 1);
+Pb2;
+plot(phi2, fill = 1, value = 1, wait = 1, cmm="Solution avec u = (0.1;0)");
+
+// Etude de convergence
+
+Vh1 PhiRef, uh1;
+Vh2 PhiMesh2, uh2;
+Vh3 PhiMesh3, uh3;
+Vh4 PhiMesh4, uh4;
+problem PbRef (PhiRef,uh1) = int2d(Th1) (k * ( dx(PhiRef) * dx(uh1) + dy(PhiRef) * dy(uh1) ) ) + on(4, PhiRef = 0) + on(2, PhiRef = 1);
+problem PbMesh2 (PhiMesh2,uh2) = int2d(Th2) (k * ( dx(PhiMesh2) * dx(uh2) + dy(PhiMesh2) * dy(uh2) ) ) + on(4, PhiMesh2 = 0) + on(2, PhiMesh2 = 1);
+problem PbMesh3 (PhiMesh3,uh3) = int2d(Th3) (k * ( dx(PhiMesh3) * dx(uh3) + dy(PhiMesh3) * dy(uh3) ) ) + on(4, PhiMesh3 = 0) + on(2, PhiMesh3 = 1);
+problem PbMesh4 (PhiMesh4,uh4) = int2d(Th4) (k * ( dx(PhiMesh4) * dx(uh4) + dy(PhiMesh4) * dy(uh4) ) ) + on(4, PhiMesh4 = 0) + on(2, PhiMesh4 = 1);
+
+PbRef;
+PbMesh2;
+PbMesh3;
+PbMesh4;
+
+plot(PhiRef, fill = 1, value = 1, wait = 1, cmm="Solution de reference");
+plot(PhiMesh2, fill = 1, value = 1, wait = 1, cmm="Solution Mesh 2");
+plot(PhiMesh3, fill = 1, value = 1, wait = 1, cmm="Solution Mesh 3");
+plot(PhiMesh4, fill = 1, value = 1, wait = 1, cmm="Solution Mesh 4");
+
+
+// Calcul des interpolations
+Vh1 InterpPhiMesh2 = PhiMesh2;
+Vh1 InterpPhiMesh3 = PhiMesh3;
+Vh1 InterpPhiMesh4 = PhiMesh4;
+
+// Calcul des erreurs absolues
+Vh1 ErrAbsolute2 = PhiRef - InterpPhiMesh2;
+Vh1 ErrAbsolute3 = PhiRef - InterpPhiMesh3;
+Vh1 ErrAbsolute4 = PhiRef - InterpPhiMesh4;
+
+// Calcul de la norme L^2 de la sol de reférence
+real normSolRef = sqrt(int2d(Th1) (PhiRef * PhiRef));
+
+// Calcul des erreurs relatives
+Vh1 ErrRelative2 = ErrAbsolute2 / normSolRef;
+Vh1 ErrRelative3 = ErrAbsolute3 / normSolRef;
+Vh1 ErrRelative4 = ErrAbsolute4 / normSolRef;
+
+// Calcul des nomred L^2 des erreurs relatives
+
+real Nerr2 = sqrt(int2d(Th1) (ErrRelative2 * ErrAbsolute2));
+real Nerr3 = sqrt(int2d(Th1) (ErrRelative3 * ErrAbsolute3));
+real Nerr4 = sqrt(int2d(Th1) (ErrRelative4 * ErrAbsolute4));
+
+cout << "Norme L2 erreur relative 2 : " << Nerr2 << endl;
+cout << "Norme L2 erreur relative 3 : " << Nerr3 << endl;
+cout << "Norme L2 erreur relative 4 : " << Nerr4 << endl;
+
+// Affichage des erreurs
+plot(ErrRelative2, fill = 1, value = 1, wait = 1,cmm="Erreur Relative 2");
+plot(ErrRelative3, fill = 1, value = 1, wait = 1,cmm="Erreur Relative 3");
+plot(ErrRelative4, fill = 1, value = 1, wait = 1,cmm="Erreur Relative 4");

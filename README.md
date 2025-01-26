@@ -224,3 +224,15 @@ $$
 $$
 
 **Remarque** : On observe que le cas des éléments finis $P_2$-$P_1$ est stable, tandis que le cas $P_1$-$P_0$ ne l'est pas.
+
+# 3. Extension en 3D
+
+Nous étendons maintenant le problème en 3D en utilisant des éléments finis **P1** pour les composantes \( u_x \), \( u_y \), et \( u_z \) du champ de vitesse \( \vec{u} \), et des éléments finis **P0** pour la pression \( p \).
+
+La géométrie du domaine \(\Omega\) est représentée ci-dessous :
+
+![Illustration du domaine \(\Omega\)](Géométrie3D.PNG)
+
+<figcaption style="text-align: center; font-weight: bold;">
+Figure 2 – Représentation du domaine pour l'extension en 3D.
+</figcaption>

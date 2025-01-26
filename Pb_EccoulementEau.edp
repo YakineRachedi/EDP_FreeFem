@@ -72,3 +72,48 @@ real[int] w = A^-1 * B;
 ux[] = w;
 plot([ux,uy], fill=1 ,value=1 ,wait=1 , cmm = "Vitesse (cas Matriciel )");
 plot(p,fill=1,value=1,wait=1, cmm = "Pression (cas Matriciel)");
+
+
+// Extension 3D
+load "msh3"
+
+border Disque (t=0,2*pi){x = d*cos(t)/2; y = d*sin(t)/2; label = 5;};
+real hDisque = 0.01;
+real r = d / 2; // rayon
+real ND = 2*pi*r / (hDisque) + 1; 
+
+mesh ThDisque = buildmesh(Disque(ND));
+
+plot(ThDisque, wait=1, cmm="disque avec h = " + hDisque); 
+
+//Extrusion du maillage
+real z0 = 0, z1 = L;
+int Nz = L /hDisque + 1; 
+int[int] rup = [0, 6];
+ 
+int[int] rdown = [0, 7];
+ 
+mesh3 ThCylindre = buildlayers(ThDisque, Nz, zbound=[z0,z1], labelup = rup, labeldown = rdown);
+plot (ThCylindre, wait=1, cmm="mesh 3D"); 
+
+
+func uzIn = 1-(sqrt(x*x + y*y)/(d/2));
+
+fespace Vh3(ThCylindre,[P1,P1,P1,P0]);
+Vh3[ux3, uy3, uz, p3],[vx3, vy3, vz, q3];
+problem Stokes3D([ux3, uy3, uz, p3], [vx3, vy3, vz, q3]) =
+    int3d(ThCylindre)(
+        mu * (dx(ux3) * dx(vx3) + dy(ux3) * dy(vx3) + dz(ux3) * dz(vx3) +
+              dx(uy3) * dx(vy3) + dy(uy3) * dy(vy3) + dz(uy3) * dz(vy3) +
+              dx(uz) * dx(vz) + dy(uz) * dy(vz) + dz(uz) * dz(vz)) 
+    )
+    - int3d(ThCylindre)(
+        p3 * (dx(vx3) + dy(vy3) + dz(vz))  
+    )
+    - int3d(ThCylindre)(
+        q3 * (dx(ux3) + dy(uy3) + dz(uz)) 
+    )
+    + on(1, ux3 = 0, uy3 = 0, uz = 0)  
+    + on(7, ux3 = uxIn, uy3 = 0, uz = uzIn);  
+
+Stokes3D;

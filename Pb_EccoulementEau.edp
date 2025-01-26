@@ -53,3 +53,22 @@ StokesMultiD2;
 
 plot([ux2, uy2], fill = 1, value = 1, wait = 1, cmm = "Vitesse cas P2");
 plot(p2, fill = 1, value = 1, wait = 1, cmm = "Pression cas P1");
+
+
+// écriture matricielle :
+
+varf a([ux,uy,p],[vx,vy,q]) = int2d(Th) ( mu * (dx(ux) * dx(vx) + dx(uy) * dx(vy) + dy(ux) * dy(vx) + dy(uy) * dy(vy) ) ) 
+                                    - int2d(Th) (p * (dx(vx) + dy(vy)) ) 
+                                    + int2d(Th) (q * (dx(ux) + dy(uy)) ) 
+                                    + on(1, 4, ux = 0, uy = 0) + on(3, ux = uxIn, uy = 0);
+
+varf b([ux,uy,p],[vx,vy,q]) = on(1, 4, ux = 0, uy = 0) + on(3, ux = uxIn, uy = 0);
+
+matrix A = a(Vh,Vh);
+real[int] B = b(0,Vh);
+set(A,solver = sparsesolver);
+
+real[int] w = A^-1 * B;
+ux[] = w;
+plot([ux,uy], fill=1 ,value=1 ,wait=1 , cmm = "Vitesse (cas Matriciel )");
+plot(p,fill=1,value=1,wait=1, cmm = "Pression (cas Matriciel)");

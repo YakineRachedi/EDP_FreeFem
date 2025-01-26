@@ -180,7 +180,7 @@ $$
 
 où les espaces fonctionnels sont définis comme suit :
 
-- $\vec{V} = \{ \vec{v} \in H^1(\Omega)^2 \mid \vec{v} = \vec{0} \text{ sur } \Gamma_{\text{wall}}, \, \vec{v} = \vec{u}_{\text{in}} \text{ sur } \Gamma_{\text{in}} \}$,
+- $\vec{V}$ = $\{ \vec{v} \in H^1(\Omega)^2 \mid \vec{v} = \vec{0} \text{ sur } \Gamma_{\text{wall}}, \, \vec{v} = \vec{u}_{\text{in}} \text{ sur } \Gamma_{\text{in}} \}$ \\
 - $Q = L^2(\Omega)$.
 
 avec : 
@@ -193,17 +193,17 @@ Soit les espaces des fonctions de base pour les éléments finis définis par :
 
 - **$X_h$** : l'ensemble des fonctions $v \in H^1(\Omega)$ telles que pour tout élément $K \in T_h$, $v$ restreint à $K$ appartient à $P_1(K)$, où $P_1(K)$ désigne l'ensemble des polynômes de degré 1 sur l'élément $K$.
   
-  $$ X_h = \left\{ v \in H^1(\Omega) \mid \forall K \in T_h, \, v|_K \in P_1(K) \right\} $$
+  $$X_h = \left\{ v \in H^1(\Omega) \mid \forall K \in T_h, \, v|_K \in P_1(K) \right\}$$
 
 - **$P_h$** : l'ensemble des fonctions $p \in L^2(\Omega)$ telles que pour tout élément $K \in T_h$, $p$ restreint à $K$ appartient à $P_0(K)$, où $P_0(K)$ désigne l'ensemble des polynômes de degré 0 (c'est-à-dire des fonctions constantes) sur l'élément $K$.
 
-  $$ P_h = \left\{ p \in L^2(\Omega) \mid \forall K \in T_h, \, p|_K \in P_0(K) \right\} $$
+  $$P_h = \left\{ p \in L^2(\Omega) \mid \forall K \in T_h, \, p|_K \in P_0(K) \right\}$$
 
 Pour les fonctionnelles vectorielles, on définit l'espace **$V_h$** comme suit :
 
 - **$V_h$** : l'ensemble des vecteurs de la forme $\vec{v} = (v_x, v_y, p)$ où $v_x \in X_h$, $v_y \in X_h$, et $p \in P_h$.
 
-  $$ V_h = \left\{ \vec{v} = (v_x, v_y, p) \mid v_x \in X_h, v_y \in X_h, p \in P_h \right\} $$
+  $$V_h = \left\{ \vec{v} = (v_x, v_y, p) \mid v_x \in X_h, v_y \in X_h, p \in P_h \right\}$$
 
 Nous allons résoudre le problème défini précédemment avec les paramètres suivants :
 - $d = 0.1$,
@@ -227,11 +227,11 @@ $$
 
 # 3. Extension en 3D
 
-Nous étendons maintenant le problème en 3D en utilisant des éléments finis **P1** pour les composantes \( u_x \), \( u_y \), et \( u_z \) du champ de vitesse \( \vec{u} \), et des éléments finis **P0** pour la pression \( p \).
+Nous étendons maintenant le problème en 3D en utilisant des éléments finis **P1** pour les composantes $u_x$, $u_y$, et $u_z$ du champ de vitesse $\vec{u}$, et des éléments finis **P0** pour la pression $p$.
 
-La géométrie du domaine \(\Omega\) est représentée ci-dessous :
+La géométrie du domaine  $\Omega$ est représentée ci-dessous :
 
-![Illustration du domaine \(\Omega\)](Géométrie3D.PNG)
+![Illustration du domaine $\Omega$](Géométrie3D.PNG)
 
 <figcaption style="text-align: center; font-weight: bold;">
 Figure 2 – Représentation du domaine pour l'extension en 3D.

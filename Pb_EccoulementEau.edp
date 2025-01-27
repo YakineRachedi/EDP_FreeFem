@@ -4,6 +4,8 @@ real L = 1;
 real h = 0.01;
 real mu = 0.1;
 
+real eps = 1e-8; // pénalisation
+
 int nx = L/h;
 int ny = d/h;
 
@@ -32,7 +34,7 @@ Vh [ux, uy, p], [vx, vy, q];
 
 problem StokesMultiD([ux, uy, p], [vx, vy, q]) = int2d(Th) ( mu * (dx(ux) * dx(vx) + dx(uy) * dx(vy) + dy(ux) * dy(vx) + dy(uy) * dy(vy) ) ) 
                                     - int2d(Th) (p * (dx(vx) + dy(vy)) ) 
-                                    + int2d(Th) (q * (dx(ux) + dy(uy)) ) 
+                                    + int2d(Th) (q * (dx(ux) + dy(uy)) ) + int2d(Th)(eps * p * q)
                                     + on(1, 4, ux = 0) + on(1,3, 4, uy = 0) + on(3, ux = uxIn);
 
 StokesMultiD;
@@ -46,7 +48,7 @@ Vh2 [ux2, uy2, p2], [vx2, vy2, q2];
 
 problem StokesMultiD2([ux2, uy2, p2], [vx2, vy2, q2]) = int2d(Th) ( mu * (dx(ux2) * dx(vx2) + dx(uy2) * dx(vy2) + dy(ux2) * dy(vx2) + dy(uy2) * dy(vy2) ) ) 
                                     - int2d(Th) (p2 * (dx(vx2) + dy(vy2)) ) 
-                                    + int2d(Th) (q2 * (dx(ux2) + dy(uy2)) ) 
+                                    + int2d(Th) (q2 * (dx(ux2) + dy(uy2)) ) + int2d(Th)(eps * p2 * q2)
                                     + on(1, 4, ux2 = 0, uy2 = 0) + on(3, ux2 = uxIn, uy2 = 0);
 
 StokesMultiD2;
@@ -54,12 +56,11 @@ StokesMultiD2;
 plot([ux2, uy2], fill = 1, value = 1, wait = 1, cmm = "Vitesse cas P2");
 plot(p2, fill = 1, value = 1, wait = 1, cmm = "Pression cas P1");
 
-
 // écriture matricielle :
 
 varf a([ux,uy,p],[vx,vy,q]) = int2d(Th) ( mu * (dx(ux) * dx(vx) + dx(uy) * dx(vy) + dy(ux) * dy(vx) + dy(uy) * dy(vy) ) ) 
                                     - int2d(Th) (p * (dx(vx) + dy(vy)) ) 
-                                    + int2d(Th) (q * (dx(ux) + dy(uy)) ) 
+                                    + int2d(Th) (q * (dx(ux) + dy(uy)) ) + int2d(Th)(eps * p * q)
                                     + on(1, 4, ux = 0, uy = 0) + on(3, ux = uxIn, uy = 0);
 
 varf b([ux,uy,p],[vx,vy,q]) = on(1, 4, ux = 0, uy = 0) + on(3, ux = uxIn, uy = 0);
@@ -80,7 +81,7 @@ load "msh3"
 border Disque (t=0,2*pi){x = d*cos(t)/2; y = d*sin(t)/2; label = 5;};
 real hDisque = 0.01;
 real r = d / 2; // rayon
-real ND = 2*pi*r / (hDisque) + 1; 
+real ND = 2*pi*r / (hDisque) + 1;
 
 mesh ThDisque = buildmesh(Disque(ND));
 
@@ -89,15 +90,14 @@ plot(ThDisque, wait=1, cmm="disque avec h = " + hDisque);
 //Extrusion du maillage
 real z0 = 0, z1 = L;
 int Nz = L /hDisque + 1; 
-int[int] rup = [0, 6];
- 
+int[int] rup = [0, 6]; 
 int[int] rdown = [0, 7];
- 
+
 mesh3 ThCylindre = buildlayers(ThDisque, Nz, zbound=[z0,z1], labelup = rup, labeldown = rdown);
 plot (ThCylindre, wait=1, cmm="mesh 3D"); 
 
 
-func uzIn = 1-(sqrt(x*x + y*y)/(d/2));
+func uzIn = 1-(x * x + y* y ) /( (d/2) * (d/2) );
 
 fespace Vh3(ThCylindre,[P1,P1,P1,P0]);
 Vh3[ux3, uy3, uz, p3],[vx3, vy3, vz, q3];
@@ -112,8 +112,10 @@ problem Stokes3D([ux3, uy3, uz, p3], [vx3, vy3, vz, q3]) =
     )
     - int3d(ThCylindre)(
         q3 * (dx(ux3) + dy(uy3) + dz(uz)) 
-    )
+    ) + int2d(ThCylindre)(eps * p3 * q3)
     + on(1, ux3 = 0, uy3 = 0, uz = 0)  
     + on(7, ux3 = uxIn, uy3 = 0, uz = uzIn);  
 
 Stokes3D;
+
+plot(uz, wait=1, fill=1, value=1, cmm="Vecteur vitesse dans la canalisation 3D en P1/P0");
